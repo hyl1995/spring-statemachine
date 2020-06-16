@@ -38,7 +38,7 @@ public class Application implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         Long time1 = System.currentTimeMillis();
-        ThreadPoolTest();
+        singleTest();
         Long time2 = System.currentTimeMillis();
         System.out.println(String.format("总耗时：%s", time2 - time1));
     }
@@ -71,28 +71,28 @@ public class Application implements CommandLineRunner {
         //从数据库获取订单状态后，构建状态机
         OrderDO order2 = new OrderDO();
         order2.setId(50L);
-        order2.setStatus(OrderStates.WAITING_FOR_RECEIVE.ordinal());
+        order2.setStatus(OrderStates.WAIT_TAKE.ordinal());
 
         //恢复
         persister.restore(stateMachine, order2);
         //查看恢复后状态机的状态
         System.out.println("恢复后的状态：" + stateMachine.getState().getId());
-        order2.setStatus(OrderStates.SHIPPING.ordinal());
-        Message<OrderEvents> message = MessageBuilder.withPayload(OrderEvents.SHIP).setHeader("order", order2).setHeader("otherObj", "otherObjValue").build();
+        order2.setStatus(OrderStates.WAIT_TAKE.ordinal());
+        Message<OrderEvents> message = MessageBuilder.withPayload(OrderEvents.TAKE).setHeader("order", order2).setHeader("otherObj", "otherObjValue").build();
         stateMachine.sendEvent(message);
         log.info("最终状态：" + stateMachine.getState().getId());
         order2 = new OrderDO();
         order2.setId(50L);
-        order2.setStatus(OrderStates.WAITING_FOR_RECEIVE.ordinal());
+        order2.setStatus(OrderStates.WAIT_TAKE.ordinal());
 
-        //恢复
-        persister.restore(stateMachine, order2);
-        //查看恢复后状态机的状态
-        System.out.println("恢复后的状态：" + stateMachine.getState().getId());
-        order2.setStatus(OrderStates.SHIPPING.ordinal());
-        message = MessageBuilder.withPayload(OrderEvents.SHIP).setHeader("order", order2).setHeader("otherObj", "otherObjValue").build();
-        stateMachine.sendEvent(message);
-        log.info("最终状态：" + stateMachine.getState().getId());
+//        //恢复
+//        persister.restore(stateMachine, order2);
+//        //查看恢复后状态机的状态
+//        System.out.println("恢复后的状态：" + stateMachine.getState().getId());
+//        order2.setStatus(OrderStates.WAIT_TAKE.ordinal());
+//        message = MessageBuilder.withPayload(OrderEvents.TAKE).setHeader("order", order2).setHeader("otherObj", "otherObjValue").build();
+//        stateMachine.sendEvent(message);
+//        log.info("最终状态：" + stateMachine.getState().getId());
     }
 
     /**
@@ -116,7 +116,7 @@ public class Application implements CommandLineRunner {
                         Long time2 = System.currentTimeMillis();
                         OrderDO order2 = new OrderDO();
                         order2.setId(i.incrementAndGet());
-                        order2.setStatus(OrderStates.WAITING_FOR_RECEIVE.ordinal());
+                        order2.setStatus(OrderStates.WAIT_TAKE.ordinal());
                         //恢复
 
                         persister.restore(stateMachine, order2);
@@ -124,8 +124,8 @@ public class Application implements CommandLineRunner {
                         Long time3 = System.currentTimeMillis();
                         //查看恢复后状态机的状态
                         System.out.println("恢复后的状态：" + stateMachine.getState().getId());
-                        order2.setStatus(OrderStates.SHIPPING.ordinal());
-                        Message<OrderEvents> message = MessageBuilder.withPayload(OrderEvents.SHIP).setHeader("order", order2).setHeader("otherObj", "otherObjValue").build();
+                        order2.setStatus(OrderStates.WAIT_TAKE.ordinal());
+                        Message<OrderEvents> message = MessageBuilder.withPayload(OrderEvents.TAKE).setHeader("order", order2).setHeader("otherObj", "otherObjValue").build();
                         stateMachine.sendEvent(message);
                         log.info("最终状态：" + stateMachine.getState().getId());
                         Long time4 = System.currentTimeMillis();
@@ -157,7 +157,7 @@ public class Application implements CommandLineRunner {
                     Long time2 = System.currentTimeMillis();
                     OrderDO order2 = new OrderDO();
                     order2.setId(i.incrementAndGet());
-                    order2.setStatus(OrderStates.WAITING_FOR_RECEIVE.ordinal());
+                    order2.setStatus(OrderStates.WAIT_TAKE.ordinal());
                     //恢复
                     try {
                         persister.restore(stateMachine, order2);
@@ -167,8 +167,8 @@ public class Application implements CommandLineRunner {
                     Long time3 = System.currentTimeMillis();
                     //查看恢复后状态机的状态
                     System.out.println("恢复后的状态：" + stateMachine.getState().getId());
-                    order2.setStatus(OrderStates.SHIPPING.ordinal());
-                    Message<OrderEvents> message = MessageBuilder.withPayload(OrderEvents.SHIP).setHeader("order", order2).setHeader("otherObj", "otherObjValue").build();
+                    order2.setStatus(OrderStates.WAIT_TAKE.ordinal());
+                    Message<OrderEvents> message = MessageBuilder.withPayload(OrderEvents.TAKE).setHeader("order", order2).setHeader("otherObj", "otherObjValue").build();
                     stateMachine.sendEvent(message);
                     log.info("最终状态：" + stateMachine.getState().getId());
                     Long time4 = System.currentTimeMillis();

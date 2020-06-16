@@ -33,28 +33,48 @@ public class OrderStateMachineConfig extends EnumStateMachineConfigurerAdapter<O
 	@Override
 	public void configure(StateMachineTransitionConfigurer<OrderStates, OrderEvents> transitions) throws Exception {
 		transitions
-				.withExternal()
-				.source(OrderStates.UNPAID).target(OrderStates.WAITING_FOR_RECEIVE)
-				.event(OrderEvents.PAY).action(orderAction.orderAction1())
+				.withInternal()
+				.source(OrderStates.UNPAID)
+				.event(OrderEvents.CREATE).action(orderAction.create())
 				.and()
+				//支付订单
 				.withExternal()
-				.source(OrderStates.WAITING_FOR_RECEIVE).target(OrderStates.SHIPPING)
-				.event(OrderEvents.SHIP).guard(orderGuard.orderGuard()).action(orderAction.orderAction2())
+				.source(OrderStates.UNPAID).target(OrderStates.WAIT_TAKE)
+				.event(OrderEvents.PAY).action(orderAction.pay())
 				.and()
+
+				//接单
 				.withExternal()
-				.source(OrderStates.SHIPPING).target(OrderStates.SHIPPED)
-				.event(OrderEvents.LOGISTICS_DISPATCH).action(orderAction.orderAction3())
+				.source(OrderStates.WAIT_TAKE).target(OrderStates.SELECT_PICK_TYPE)
+				.event(OrderEvents.TAKE).action(orderAction.take())
 				.and()
+				//选择提货方式
+				.withChoice()
+				.source(OrderStates.SELECT_PICK_TYPE)
+				.first(OrderStates.DELIVERING, orderGuard.selectPickType(), orderAction.selectDeliver())//配送
+				.last(OrderStates.WAIT_PICK_UP, orderAction.selectPickUp())//自提
+				.and()
+
+				//已送达
 				.withExternal()
-				.source(OrderStates.SHIPPED).target(OrderStates.FINISH)
-				.event(OrderEvents.RECEIVE).action(orderAction.orderAction4())
+				.source(OrderStates.DELIVERING).target(OrderStates.FINISH)
+				.event(OrderEvents.ARRIVED).action(orderAction.arrived())
 				.and()
+
+				//自提完毕
+				.withExternal()
+				.source(OrderStates.WAIT_PICK_UP).target(OrderStates.FINISH)
+				.event(OrderEvents.PICK_UP_FINISH).action(orderAction.pickUpFinish())
+				.and()
+
+				//退款
 				.withExternal()
 				.source(OrderStates.FINISH).target(OrderStates.REFUNDED)
-				.event(OrderEvents.REFUND).action(orderAction.orderAction5())
+				.event(OrderEvents.REFUND).action(orderAction.refund())
 				.and()
+				//取消订单
 				.withExternal()
 				.source(OrderStates.UNPAID).target(OrderStates.CLOSED)
-				.event(OrderEvents.CANCEL).action(orderAction.orderAction6());
+				.event(OrderEvents.CANCEL).action(orderAction.cancel());
 	}
 }
